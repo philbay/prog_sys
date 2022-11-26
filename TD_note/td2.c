@@ -11,6 +11,12 @@
 
 #define BUFFER_SIZE 50
 
+/**
+ * @brief 
+ * function that shows all the details ls -l would display on a file or directory
+ * @param ref 
+ * @param statut 
+ */
 void print_stat(const char * ref, struct stat *statut){
 	struct passwd * pw;
 	struct group *gr;
