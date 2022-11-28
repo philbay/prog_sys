@@ -11,7 +11,7 @@
 #include <string.h>
 
 #define BUFFER_SIZE 50
-
+#define OPTION_SIZE 3
 /**
  * @brief 
  * function that shows all the details ls -l would display on a file or directory
@@ -45,7 +45,7 @@ void print_stat(const char * ref){
 			modifytime = statut->st_mtim;
 			timespec_get(&modifytime, TIME_UTC);
 			char mtime[ BUFFER_SIZE ];
-			if(strftime( mtime, BUFFER_SIZE, "%b %d %H:%M", gmtime( &modifytime.tv_sec )) == -1){
+			if(strftime( mtime, BUFFER_SIZE, "	%b	%d	%H:%M", localtime( &modifytime.tv_sec)) == -1){
 				perror("date and time not captured strftime");
 			}
 			
@@ -107,10 +107,10 @@ void print_stat(const char * ref){
 
 /**
  * @brief list directory content iteratively
- * 
+ *  basic format
  * @param nameDir 
  */
-void ls_dir(char*dir_name){
+void ls_dir_regular(char*dir_name){
  
   DIR*dir=opendir(dir_name);
   if(dir == NULL){
@@ -120,9 +120,32 @@ void ls_dir(char*dir_name){
     struct dirent* dir_entry;
     dir_entry = readdir(dir);
     while(dir_entry != NULL){
-        //if(dir_entry->d_type == DT_REG)
-        //printf("%s\n", dir_entry->d_name);
 		print_stat(dir_entry->d_name);
+        dir_entry = readdir(dir);
+    }
+     closedir(dir);
+}
+
+void ls_dir_recursive(char*dir_name){
+ 
+  DIR*dir=opendir(dir_name);
+  if(dir == NULL){
+    return;
+  }
+    struct dirent* dir_entry;
+    dir_entry = readdir(dir);
+    while(dir_entry != NULL){
+        
+       // printf("%s %s\n", dir_name, dir_entry->d_name);
+		print_stat(dir_entry->d_name);
+        if(dir_entry->d_type == DT_DIR && strcmp(dir_entry->d_name, ".")!= 0 
+        && dir_entry->d_type != DT_LNK && strcmp(dir_entry->d_name, "..")!= 0){
+            char path[BUFFER_SIZE] = {0};
+            strcat(path, dir_name);
+            strcat(path, "/");
+            strcat(path, dir_entry->d_name);
+            ls_dir(path);
+        }
         dir_entry = readdir(dir);
     }
      closedir(dir);
@@ -130,10 +153,22 @@ void ls_dir(char*dir_name){
 
 int main(int argc, char * argv[]){
 
-char *file = argv[1];
-//struct stat *statut = malloc(sizeof(struct stat));
+char *file = argv[2];
 
-ls_dir(file);
+char *argument = argv[1];
+
+if(strcomp(argument, "-Ra")){
+	printf("option Ra");
+}
+if(strcomp(argument, "-R")){
+	printf("Option R");
+}
+if(strcomp(argument, "-Rh")){
+	printf("option Rh");
+}
+
+
+// ls_dir_regular(file);
 // print_stat(file, statut);
 
 
