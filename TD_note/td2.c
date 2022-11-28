@@ -18,10 +18,11 @@
  * @param ref 
  * @param statut 
  */
-void print_stat(const char * ref, struct stat *statut){
+void print_stat(const char * ref){
 		struct passwd * pw;
 		struct group *gr;
 		char type;
+        struct stat *statut = malloc(sizeof(struct stat));
 
 	struct filedetails {
 		char * file_mode;
@@ -101,7 +102,7 @@ void print_stat(const char * ref, struct stat *statut){
 		
 	printf("%s %d %s %s %lld %s %s\n", filedata.file_mode, filedata.file_nlink, filedata.file_uid, filedata.file_gid, filedata.file_size, filedata.file_modif_date, ref);
 		
-
+	free(statut);
 }
 
 /**
@@ -109,25 +110,32 @@ void print_stat(const char * ref, struct stat *statut){
  * 
  * @param nameDir 
  */
-void ls_dir(char*nameDir){
+void ls_dir(char*dir_name){
  
-  DIR*dir=opendir(nameDir);
-  struct dirent* d;
- 
-  if(dir){
-    while( (d=readdir(dir)) ){
-	  printf("%s\n",d->d_name);
-    }
-    closedir(dir);
+  DIR*dir=opendir(dir_name);
+  if(dir == NULL){
+    return;
   }
+
+    struct dirent* dir_entry;
+    dir_entry = readdir(dir);
+    while(dir_entry != NULL){
+        //if(dir_entry->d_type == DT_REG)
+        //printf("%s\n", dir_entry->d_name);
+		print_stat(dir_entry->d_name);
+        dir_entry = readdir(dir);
+    }
+     closedir(dir);
 }
 
 int main(int argc, char * argv[]){
 
 char *file = argv[1];
-struct stat *statut = malloc(sizeof(struct stat));
+//struct stat *statut = malloc(sizeof(struct stat));
 
-print_stat(file, statut);
+ls_dir(file);
+// print_stat(file, statut);
+
 
 return 0;
 }
